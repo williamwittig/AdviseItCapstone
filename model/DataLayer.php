@@ -21,13 +21,6 @@ class DataLayer
         // Include configuration file and retrieve PDO object
         require $_SERVER['DOCUMENT_ROOT'].'/../config.php';
         $this->_dbh = $dbh;
-
-        // Enable Error reporting
-        $this->_dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->_dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-        // Import
-        require 'Validator.php';
     }
 
     /**
@@ -37,6 +30,9 @@ class DataLayer
      */
     function generateToken(): string
     {
+        // Import
+        require("Validator.php");
+
         $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $token = substr(str_shuffle($permitted_chars), 0, 6);
 

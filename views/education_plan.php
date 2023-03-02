@@ -34,9 +34,11 @@
 					<div class="form-group text-center mb-2">
 						<h4>Student Token: <?php echo $_SESSION['token'] ?></h4>
 						<!-- Token Input -->
-						<input id="tokenInput" type="hidden" name="token" value="<?php echo $_SESSION['token'] ?>">
-					</div>
+                        <input id="tokenInput" type="hidden" name="token"
+                               value="<?php echo $_SESSION['token'] ?? 'default_value'; ?>">
+                    </div>
 
+                    <!--If advisor is present, the value will be the advisor name, else empty String-->
 					<label for="advisor">
 						Advisor:
 						<input
@@ -44,7 +46,7 @@
 							type="text"
 							class="form-control text-center m-2 mx-auto w-100 shadow-sm"
 							name="advisor"
-							value="<?php echo $_SESSION['advisor'] ?>"
+                            value="<?php echo $_SESSION['advisor'] ?? ''; ?>"
 							placeholder="Enter advisor"
 						>
 					</label>
@@ -60,13 +62,15 @@
 					</div>
 
 					<div id="schoolYears">
-						<repeat group="{{ @schoolYears }}" key="{{ @year }}" value="{{ @schoolYear }}">
-						<check if="{{ @schoolYear['render'] }}">
+						<repeat group="{{ @schoolYears }}" key="{{ @year }}"
+                                value="<?php echo $_SESSION['schoolYear'] ?? ''; ?>">
+						<check if="<?php echo $_SESSION['schoolYear']['2023']['render'] ?? ''; ?>">
 							<div id="{{ @year }}" class="container p-0">
 
 								<!-- Year Separator -->
 								<div class="col-sm">
-									<h3 class="text-end text-secondary mb-0">{{ @year }}</h3>
+									<h3 class="text-end text-secondary mb-0">
+                                        <?php echo implode($_SESSION['schoolYears']['2023']['winter']) ?? ''; ?></h3>
 									<input
 										type="hidden"
 										value="{{ @year }}"
@@ -80,7 +84,9 @@
 									<div class="col-sm">
 										<div>
 											<h4 class="d-inline">Fall Quarter</h4>
-											<h5>{{ @year - 1 }}</h5>
+											<h5>
+                                                <?php echo implode($_SESSION['schoolYears']['2023']['fall']) ?? ''; ?>
+                                            </h5>
 										</div>
 
 										<div class="input-group m-2">
@@ -99,7 +105,9 @@
 									<div class="col-sm">
 										<div>
 											<h4 class="d-inline">Winter Quarter</h4>
-											<h5>{{ @year }}</h5>
+                                            <h5>
+                                                <?php echo implode($_SESSION['schoolYears']['2023']['winter']) ?? ''; ?>
+                                            </h5>
 										</div>
 
 										<div class="input-group m-2">
@@ -121,7 +129,9 @@
 									<div class="col-sm">
 										<div>
 											<h4 class="d-inline">Spring Quarter</h4>
-											<h5>{{ @year }}</h5>
+                                            <h5>
+                                                <?php echo implode($_SESSION['schoolYears']['2023']['spring']) ?? ''; ?>
+                                            </h5>
 										</div>
 
 										<div class="input-group m-2">
@@ -139,7 +149,9 @@
 									<div class="col-sm">
 										<div>
 											<h4 class="d-inline">Summer Quarter</h4>
-											<h5>{{ @year }}</h5>
+                                            <h5>
+                                                <?php echo implode($_SESSION['schoolYears']['2023']['summer']) ?? ''; ?>
+                                            </h5>
 										</div>
 
 										<div class="input-group m-2 mb-4">

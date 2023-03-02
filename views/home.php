@@ -24,7 +24,7 @@
 				<h1 class="pt-5 pb-3">Home Page</h1>
 				<hr>
 				<a
-					href="view-plan/{{ @newToken }}"
+					href="/AdviseItCapstone/educationPlan"
 					class="btn btn-lg m-3 mt-3 bg-grcgreen text-white"
 				>New Education Plan</a>
 			</div>

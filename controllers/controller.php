@@ -9,6 +9,10 @@ class Controller {
     function __construct() {
         require_once $_SERVER['DOCUMENT_ROOT'].'/../config.php';
         $this->_dbh = $dbh;
+
+        // Enable Error reporting
+        $this->_dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->_dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
 
     // ---------- Routing functions ----------
@@ -25,11 +29,58 @@ class Controller {
 
     function educationPlan() {
         // Generating new student token
-        $_SESSION['token'] = $GLOBALS['datalayer']->generateToken();
+        $_SESSION['token'] = $token = $GLOBALS['datalayer']->generateToken();
+
+        // Initialize Variables to determine rendering characteristics
+        $lastUpdated = ""; // Variable to store most recent save time
+        $formSubmitted = false; // Display submitted form data + confirmation
+        $saveSuccess = false; // Determines state of confirmation message
+        $advisor = "";
+
+        // Check if form was submitted
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST)) {
+            $formSubmitted = true;
+
+            // Store current token (if valid)
+            if (Validator::validToken($_POST['token'])) {
+                $token = $_POST['token'];
+            }
+            if (isset($_POST['advisor'])) {
+                $advisor = $_POST['advisor'];
+            }
+
+            // Attempt to save data in POST to database
+            if ($GLOBALS['datalayer']->planExists($token)) {
+                // Plan is stored in database (UPDATE)
+                $saveSuccess = $GLOBALS['datalayer']->updatePlan($token);
+            }
+            else {
+                // Plan was not already in database (INSERT)
+                $saveSuccess = $GLOBALS['datalayer']->saveNewPlan($token);
+            }
+        }
+
+        // Get token data from database
+        $plan = $GLOBALS['datalayer']->getPlan($token);
+
+        // Check if Token is stored in database (new plans are not in database)
+        if (!empty($plan['token'])) {
+            $token = $plan['token'];
+            $lastUpdated = Formatter::formatTime($plan['lastUpdated']);
+            $advisor = $plan['advisor'];
+            $schoolYears = $plan['schoolYears'];
+        }
+        else { // No plan data (display current blank year)
+            $schoolYears = DataLayer::createBlankPlan()['schoolYears'];
+        }
+
+        $_SESSION['schoolYears'] = $schoolYears;
+        var_dump($_SESSION['schoolYears']['2023']);
 
         // Render the view
         require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/education_plan.php';
     }
+
 
     function login() {
         // Render the view
@@ -94,61 +145,5 @@ class Controller {
         session_destroy();
         header("Location: ./");
     }
-
-    function viewPlan($token)
-    {
-        // If token is invalid, redirect to home
-        if (!(Validator::validToken($token))) {
-            header('location: ../');
-        }
-
-        // Generate New Token for "Education Plan" Link
-        $newToken = $GLOBALS['datalayer']->generateToken();
-
-        // Initialize Variables to determine rendering characteristics
-        $lastUpdated = ""; // Variable to store most recent save time
-        $formSubmitted = false; // Display submitted form data + confirmation
-        $saveSuccess = false; // Determines state of confirmation message
-        $advisor = "";
-
-        // Check if form was submitted
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST)) {
-            $formSubmitted = true;
-
-            // Store current token (if valid)
-            if (Validator::validToken($_POST['token'])) {
-                $token = $_POST['token'];
-            }
-            if (isset($_POST['advisor'])) {
-                $advisor = $_POST['advisor'];
-            }
-
-            // Attempt to save data in POST to database
-            if ($GLOBALS['datalayer']->planExists($token)) {
-                // Plan is stored in database (UPDATE)
-                $saveSuccess = $GLOBALS['datalayer']->updatePlan($token);
-            }
-            else {
-                // Plan was not already in database (INSERT)
-                $saveSuccess = $GLOBALS['datalayer']->saveNewPlan($token);
-            }
-        }
-
-        // Get token data from database
-        $plan = $GLOBALS['datalayer']->getPlan($token);
-
-        // Check if Token is stored in database (new plans are not in database)
-        if (!empty($plan['token'])) {
-            $token = $plan['token'];
-            $lastUpdated = Formatter::formatTime($plan['lastUpdated']);
-            $advisor = $plan['advisor'];
-            $schoolYears = $plan['schoolYears'];
-        }
-        else { // No plan data (display current blank year)
-            $schoolYears = DataLayer::createBlankPlan()['schoolYears'];
-        }
-
-        // Render page
-        require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/education_plan.php';
-    }
 }
+
