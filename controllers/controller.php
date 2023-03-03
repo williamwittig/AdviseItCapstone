@@ -6,14 +6,21 @@ class Controller {
 
     // ---------- Routing functions ----------
     function home() {
+        $displayLoginForm = false;
         // Open login form if redirected
         if (isset($_SESSION['displayLogin']) && $_SESSION['displayLogin'] === true) {
             // IMPORTANT! CLEAR VALUE
             $_SESSION['displayLogin'] = false;
+            $displayLoginForm = true;
         }
 
+        // Generate token for new plan link/s
+        $newToken = $GLOBALS['datalayer']->generateToken();
+        $username = "";
+        $errorMessage = "";
+
         // Render the view
-        require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/home.php';
+        require 'views/home.php';
     }
 
     function educationPlan() {
@@ -67,21 +74,67 @@ class Controller {
         var_dump($_SESSION['schoolYears']['2023']);
 
         // Render the view
-        require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/education_plan.php';
+        require 'views/education_plan.php';
     }
 
 
     function login() {
-        // Render the view
-        require $_SERVER['DOCUMENT_ROOT'].'/AdviseItCapstone/views/login.html';
+        // Ensure form has been submitted
+        if (empty($_POST)) {
+            // Load home page (without login form)
+            require 'views/home.php';
+            return; // Escape controller
+        }
+
+        // Get the login form data (if present)
+        $username = $_POST['username'] ?? "";
+        $password = $_POST['password'] ?? "";
+
+        // Validate not empty
+        if ($username === "" || $password === "") {
+            // Reload login form
+            $this->failedLogin("Please enter username and Password", $username);
+            return; // Escape controller
+        }
+
+        // Require the credentials file, which defines a $Logins array
+        require($_SERVER['DOCUMENT_ROOT'].'/../users.php');
+        if (!isset($logins)) {
+            $this->failedLogin("Failed to connect to server", $username);
+            return; // Escape controller
+        }
+
+        // Validate username (if credentials loaded)
+        if (!array_key_exists($username, $logins)) {
+            //Invalid login (username) -- set flag variable
+            $this->failedLogin("Invalid username or password", $username);
+            return; // Escape controller
+        }
+        
+        // Validate Password
+        if ($password !== $logins[$username]) {
+            // Invalid login (password) -- set flag variable
+            $this->failedLogin("Invalid username or password", $username);
+            return; // Escape controller
+        }
+        
+        // ==== LOGGED IN ==== //
+
+        //Record the username in the session array
+        $_SESSION['logged-in'] = true;
+        $_SESSION['username'] = $username;
+
+        // Load admin page!
+        header('location: admin');
     }
+
 
     function admin() {
         // Check that the user is logged in
         if (!isset($_SESSION['logged-in']) || $_SESSION['logged-in'] != true || !isset($_SESSION['username'])) {
             // Failed to log in (Render Login on Home page)
             $_SESSION['displayLogin'] = true;
-            header('location: ./');
+            header('location: '.$GLOBALS['PROJECT_DIR']);
         }
 
         // Generate New Token for "Education Plan" Link
@@ -91,48 +144,25 @@ class Controller {
         $plans = $GLOBALS['datalayer']->getPlans();
 
         // Render the view
-        require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/admin.php';
+        require 'views/admin.php';
     }
 
     // ---------- Helper functions ----------
-    function loginAttempt() {
-        // If the form has been submitted
-        if (!empty($_POST)) {
+    // Helper method to reload login form on a failed login attempt
+    private function failedLogin($errorMessage, $username) {
+        // Error message and username are loaded on page
+        // Open login form on load
+        $displayLoginForm = true;
 
-            //Get the form data
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-
-            // Require the credentials file, which defines a $Logins array
-            require($_SERVER['DOCUMENT_ROOT'].'/../users.php');
-            if (!isset($logins)) {
-            }
-            // If the username is in the array and the passwords match
-            else if (array_key_exists($username, $logins)) {
-                if ($password == $logins[$username]) {
-                    //Record the username in the session array
-                    $_SESSION['logged-in'] = true;
-                    $_SESSION['username'] = $username;
-
-                    header('location: admin');
-                }
-                else {
-                    // Invalid login (password) -- set flag variable
-                }
-            }
-            else {
-                //Invalid login (username) -- set flag variable
-                if ($username !== "") {
-                }
-            }
-            // Failed to log in (Render Home page)
-            require $_SERVER['DOCUMENT_ROOT'] . '/AdviseItCapstone/views/home.php';
-        }
+        // Load home page
+        $newToken = $GLOBALS['datalayer']->generateToken();
+        require 'views/home.php';
     }
 
     function logout() {
         session_destroy();
-        header("Location: ./");
+        // Redirect to home page
+        header("Location: ".$GLOBALS['PROJECT_DIR']);
     }
 }
 

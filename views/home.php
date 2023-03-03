@@ -1,3 +1,12 @@
+<?php
+    // Required variables to be declared in controller prior to loading page
+    // Ignore "Undefined variable" error message
+    $newToken;
+    $displayLoginForm;
+    $username;
+    $errorMessage;
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -24,7 +33,7 @@
 				<h1 class="pt-5 pb-3">Home Page</h1>
 				<hr>
 				<a
-					href="/AdviseItCapstone/educationPlan"
+					href="plan/<?php echo $newToken; ?>"
 					class="btn btn-lg m-3 mt-3 bg-grcgreen text-white"
 				>New Education Plan</a>
 			</div>
@@ -44,18 +53,17 @@
 
 						<div class="form-group">
 							<label for="username">Username</label>
-							<input type="text" class="form-control" id="username" name="username" value="{{ @username }}">
+							<input type="text" class="form-control" id="username" name="username" value="<?php echo $username; ?>">
 						</div>
 						<div class="form-group">
 							<label for="password">Password</label>
 							<input type="password" class="form-control" id="password" name="password" >
 						</div>
-						<check if="{{ @validLogin == false }}">
-							<p class='error'>{{ @errorMessage }}</p>
-						</check>
+                        <!-- Error Message -->
+                        <p class='text-danger'><?php echo $errorMessage; ?></p>
 					</div>
 					<div class="modal-footer">
-						<a class="btn btn-secondary" href="{{ @cancelLink }}">Cancel</a>
+						<a class="btn btn-secondary" href="">Cancel</a>
 						<button type="submit" class="btn bg-grcgreen text-white">Login</button>
 					</div>
 
@@ -76,9 +84,11 @@
 		crossorigin="anonymous"
 	></script>
 
-	<!-- Open Login modal if attempt was made -->
-	<check if="{{ @displayForm }}">
-		<script src="scripts/displayLogin.js"></script>
-	</check>
+
+	<?php // Open Login modal if attempt was made
+    if (isset($displayLoginForm) && $displayLoginForm === true) {
+        echo '<script src="js/displayLogin.js"></script>';
+    }
+	?>
 </body>
 </html>
