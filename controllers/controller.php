@@ -3,17 +3,6 @@
 include '../classes/schedule.php';
 
 class Controller {
-    private $_dbh;
-
-    // ---------- Constructor function ----------
-    function __construct() {
-        require_once $_SERVER['DOCUMENT_ROOT'].'/../config.php';
-        $this->_dbh = $dbh;
-
-        // Enable Error reporting
-        $this->_dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->_dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    }
 
     // ---------- Routing functions ----------
     function home() {
