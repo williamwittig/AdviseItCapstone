@@ -1,7 +1,6 @@
 <?php
     // Required variables to be declared in controller prior to loading page
     // Ignore "Undefined variable" error message
-    $newToken;
     $displayLoginForm;
     $username;
     $errorMessage;
@@ -19,7 +18,7 @@
 	  	integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
 		crossorigin="anonymous"
 	>
-	<link rel="stylesheet" href="styles/styles.css">
+	<link rel="stylesheet" href="<?php echo $GLOBALS['PROJECT_DIR']; ?>/styles/styles.css">
 
 	<title>Home</title>
 </head>
@@ -33,7 +32,7 @@
 				<h1 class="pt-5 pb-3">Home Page</h1>
 				<hr>
 				<a
-					href="plan/<?php echo $newToken; ?>"
+					href="plan"
 					class="btn btn-lg m-3 mt-3 bg-grcgreen text-white"
 				>New Education Plan</a>
 			</div>
@@ -87,7 +86,7 @@
 
 	<?php // Open Login modal if attempt was made
     if (isset($displayLoginForm) && $displayLoginForm === true) {
-        echo '<script src="js/displayLogin.js"></script>';
+        echo '<script src="'.$GLOBALS['PROJECT_DIR'].'/scripts/displayLogin.js"></script>';
     }
 	?>
 </body>

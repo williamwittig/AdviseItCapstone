@@ -1,6 +1,8 @@
 <?php
-require_once './controllers/controller.php';
-require_once './model/DataLayer.php';
+require_once('./model/Formatter.php');
+require_once('./model/Validator.php');
+require_once('./model/DataLayer.php');
+require_once('./controllers/controller.php');
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -12,12 +14,17 @@ $GLOBALS['datalayer'] = new DataLayer();
 
 // Get project file path relative to root (e.g. "/485/adviseitcapstone")
 $PROJECT_DIR = dirname($_SERVER['PHP_SELF']);
-//echo "Project Directory: " . $PROJECT_DIR ." ";
-//echo "Request URI: " . $_SERVER['REQUEST_URI'] . " ";
 
 // Subtract project directory path from request to get relative request path
 $request = substr($_SERVER['REQUEST_URI'], strlen($PROJECT_DIR));
-//echo "Request:" . $request;
+
+// Parse token if passed in URL
+if (substr($request, 0, 5) === "/plan") {
+    // Extract token from "/plan/123ABC"
+    $token = substr($request, 6);
+    // Remove token for switch -> "/plan"
+    $request = substr($request, 0, 5);
+}
 
 switch ($request) {
     case '/':
@@ -31,10 +38,13 @@ switch ($request) {
         }
         break;
     case '/plan':
-        $controller->educationPlan();
+        $controller->educationPlan($token);
         break;
     case '/admin':
         $controller->admin();
+        break;
+    case '/admin-footer-links':
+        $controller->adminFooterLinks();
         break;
     case '/logout':
         $controller->logout();
